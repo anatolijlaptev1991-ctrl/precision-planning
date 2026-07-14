@@ -46,7 +46,7 @@
 - ✅ контроль конфликтов ресурсов и доказанный параллелизм;
 - ✅ перепланирование затронутого подграфа при drift или пропуске задачи;
 - ✅ финальная проверка полноты, логики, исполнимости и безопасности;
-- ✅ установка одной npm-командой с сохранением команды `/laptev_plan`.
+- ✅ установка одной npm-командой с командами `/laptev-plan` и `/laptev_plan`.
 
 ## Установка
 
@@ -62,7 +62,7 @@ precision-planning install
 1. копирует `SKILL.md` в `~/.hermes/skills/software-development/precision-planning/`;
 2. добавляет `precision-planning` в `HERMES_TUI_SKILLS` в `~/.hermes/.env`;
 3. обновляет Windows User Environment Variable для Desktop/Tauri-пути;
-4. регистрирует alias `/laptev_plan` → `/precision-planning` в `config.yaml`.
+4. регистрирует aliases `/laptev-plan` и `/laptev_plan` → `/precision-planning` в `config.yaml`.
 
 После установки создайте новую сессию Hermes командой `/new` или перезапустите
 приложение.
@@ -85,13 +85,19 @@ precision-planning install --home "C:\\Users\\<user>\\.hermes\\profiles\\<profil
 В Hermes Agent:
 
 ```text
+/laptev-plan
+```
+
+Совместимое имя с подчёркиванием:
+
+```text
 /laptev_plan
 ```
 
 или сразу с задачей:
 
 ```text
-/laptev_plan Подготовь план миграции этого сервиса на новую схему токенов.
+/laptev-plan Подготовь план миграции этого сервиса на новую схему токенов.
 ```
 
 Также доступно прямое имя скилла:
