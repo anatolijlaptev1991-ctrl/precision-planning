@@ -1,7 +1,7 @@
 {
   "name": "@anatolijlaptev1991/precision-planning",
-  "version": "1.0.5",
-  "description": "Precision Planning Skill v6 для Hermes Agent: точные, проверяемые и безопасные планы выполнения.",
+  "version": "1.0.6",
+  "description": "Скилл генерации плана выполнения задачи v4.0 для Hermes Agent: формальные контракты, модель рисков, машинно-читаемые YAML/NDJSON артефакты, evidence-модель и аудит.",
   "license": "MIT",
   "author": "Анатолий Лаптев",
   "repository": {
