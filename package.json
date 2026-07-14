@@ -1,0 +1,41 @@
+{
+  "name": "@anatolijlaptev1991/precision-planning",
+  "version": "1.0.0",
+  "description": "Precision Planning Skill v6 для Hermes Agent: точные, проверяемые и безопасные планы выполнения.",
+  "license": "MIT",
+  "author": "Анатолий Лаптев",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anatolijlaptev1991-ctrl/precision-planning.git"
+  },
+  "homepage": "https://github.com/anatolijlaptev1991-ctrl/precision-planning",
+  "bugs": {
+    "url": "https://github.com/anatolijlaptev1991-ctrl/precision-planning/issues"
+  },
+  "bin": {
+    "precision-planning": "bin/precision-planning.js"
+  },
+  "files": [
+    "bin/",
+    "skill/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "keywords": [
+    "hermes-agent",
+    "hermes-skill",
+    "planning",
+    "precision-planning",
+    "ai-agents",
+    "coding-agents",
+    "requirements",
+    "traceability",
+    "rollback",
+    "evidence",
+    "русский"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
