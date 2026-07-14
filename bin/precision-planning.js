@@ -217,7 +217,7 @@ function main() {
     if (args.command === 'install') install(home);
     else if (args.command === 'status') status(home);
     else if (args.command === 'uninstall') uninstall(home);
-    else if (args.command === 'version') console.log('1.0.3');
+    else if (args.command === 'version') console.log('1.0.4');
     else help();
   } catch (error) {
     console.error(`Ошибка: ${error.message}`);
