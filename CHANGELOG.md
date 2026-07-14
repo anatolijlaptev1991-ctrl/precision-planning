@@ -1,5 +1,13 @@
 # История изменений
 
+## 1.0.3 — 2026-07-14
+
+- Каноническое имя скилла изменено на `laptev-plan`, как у `laptev-plan-impl`.
+- Скилл теперь устанавливается в общий каталог Hermes `skills/software-development/laptev-plan/`.
+- Команда `/laptev-plan` теперь создаётся самим skill scanner во всех сессиях.
+- `/laptev_plan` и `/precision-planning` сохранены как совместимые aliases.
+- Установщик мигрирует старый рекурсивный alias `/laptev-plan`.
+
 ## 1.0.2 — 2026-07-14
 
 - Исправлена доступность команды `/laptev-plan`.

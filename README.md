@@ -46,7 +46,8 @@
 - ✅ контроль конфликтов ресурсов и доказанный параллелизм;
 - ✅ перепланирование затронутого подграфа при drift или пропуске задачи;
 - ✅ финальная проверка полноты, логики, исполнимости и безопасности;
-- ✅ установка одной npm-командой с командами `/laptev-plan` и `/laptev_plan`.
+- ✅ глобальная skill-команда `/laptev-plan` во всех сессиях Hermes;
+- ✅ совместимые aliases `/laptev_plan` и `/precision-planning`.
 
 ## Установка
 
@@ -59,10 +60,11 @@ precision-planning install
 
 Установщик:
 
-1. копирует `SKILL.md` в `~/.hermes/skills/software-development/precision-planning/`;
-2. добавляет `precision-planning` в `HERMES_TUI_SKILLS` в `~/.hermes/.env`;
+1. копирует `SKILL.md` в `~/.hermes/skills/software-development/laptev-plan/`;
+2. добавляет `laptev-plan` в `HERMES_TUI_SKILLS` в `~/.hermes/.env`;
 3. обновляет Windows User Environment Variable для Desktop/Tauri-пути;
-4. регистрирует aliases `/laptev-plan` и `/laptev_plan` → `/precision-planning` в `config.yaml`.
+4. регистрирует совместимые aliases `/laptev_plan` и `/precision-planning` → `/laptev-plan` в `config.yaml`;
+5. не регистрирует `/laptev-plan` как quick command: эта команда создаётся Hermes skill scanner напрямую.
 
 После установки создайте новую сессию Hermes командой `/new` или перезапустите
 приложение.
@@ -88,6 +90,10 @@ precision-planning install --home "C:\\Users\\<user>\\.hermes\\profiles\\<profil
 /laptev-plan
 ```
 
+Это канонический skill-command, который обнаруживается из frontmatter
+`name: laptev-plan` в общем каталоге `~/.hermes/skills/` и доступен после
+перезапуска в любой новой сессии.
+
 Совместимое имя с подчёркиванием:
 
 ```text
@@ -100,7 +106,7 @@ precision-planning install --home "C:\\Users\\<user>\\.hermes\\profiles\\<profil
 /laptev-plan Подготовь план миграции этого сервиса на новую схему токенов.
 ```
 
-Также доступно прямое имя скилла:
+Также сохранён совместимый alias:
 
 ```text
 /precision-planning
@@ -183,7 +189,7 @@ Precision Planning не заявляет, что заменяет исполне
 
 ```text
 precision-planning/
-├── skill/SKILL.md              # Precision Planning Skill v6.0.0
+├── skill/SKILL.md              # laptev-plan / Precision Planning Skill v6.0.0
 ├── bin/precision-planning.js   # npm CLI: install/status/uninstall
 ├── package.json                # npm-пакет
 ├── README.md                   # описание, установка и сравнение

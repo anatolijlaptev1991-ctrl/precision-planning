@@ -6,9 +6,11 @@ const path = require('node:path');
 const os = require('node:os');
 const { spawnSync } = require('node:child_process');
 
-const SKILL_NAME = 'precision-planning';
-const COMMAND_NAMES = ['laptev-plan', 'laptev_plan'];
-const COMMAND_TARGET = '/precision-planning';
+const SKILL_NAME = 'laptev-plan';
+const LEGACY_SKILL_NAME = 'precision-planning';
+const COMMAND_NAMES = ['laptev_plan', 'precision-planning'];
+const LEGACY_COMMAND_NAMES = ['laptev-plan'];
+const COMMAND_TARGET = '/laptev-plan';
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const BUNDLED_SKILL = path.join(PACKAGE_ROOT, 'skill', 'SKILL.md');
 
@@ -53,7 +55,7 @@ function addSkillToEnv(content) {
   const line = /^export HERMES_TUI_SKILLS=(.*)$/m;
   const match = content.match(line);
   if (match) {
-    const values = match[1].split(',').map((item) => item.trim()).filter(Boolean);
+    const values = match[1].split(',').map((item) => item.trim()).filter((item) => item && item !== LEGACY_SKILL_NAME);
     if (!values.includes(wanted)) values.unshift(wanted);
     return content.replace(line, `export HERMES_TUI_SKILLS=${values.join(',')}`);
   }
@@ -65,7 +67,9 @@ function removeSkillFromEnv(content) {
   const line = /^export HERMES_TUI_SKILLS=(.*)$/m;
   const match = content.match(line);
   if (!match) return content;
-  const values = match[1].split(',').map((item) => item.trim()).filter((item) => item && item !== SKILL_NAME);
+  const values = match[1].split(',').map((item) => item.trim()).filter(
+    (item) => item && item !== SKILL_NAME && item !== LEGACY_SKILL_NAME,
+  );
   if (values.length) return content.replace(line, `export HERMES_TUI_SKILLS=${values.join(',')}`);
   return content.replace(/\n?# Precision Planning preload\n/, '\n').replace(`${match[0]}\n`, '');
 }
@@ -79,6 +83,24 @@ function quickCommandBlock() {
       `    target: ${COMMAND_TARGET}`,
     ]),
   ].join('\n');
+}
+
+function removeQuickCommandBlocks(content, names, targets) {
+  const lines = content.split(/\r?\n/);
+  const output = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const name = lines[index].trimEnd();
+    const type = lines[index + 1]?.trim();
+    const targetLine = lines[index + 2]?.trim();
+    const isCommand = names.some((item) => name === `  ${item}:`);
+    const isAlias = type === 'type: alias' && targets.some((item) => targetLine === `target: ${item}`);
+    if (isCommand && isAlias) {
+      index += 2;
+      continue;
+    }
+    output.push(lines[index]);
+  }
+  return output.join('\n');
 }
 
 function updateQuickCommand(content) {
@@ -96,6 +118,12 @@ function updateQuickCommand(content) {
   const end = nextTopLevel >= 0 ? afterHeader + nextTopLevel + 1 : content.length;
   let section = content.slice(start, end);
 
+  section = removeQuickCommandBlocks(
+    section,
+    LEGACY_COMMAND_NAMES,
+    ['/precision-planning', COMMAND_TARGET],
+  );
+
   for (const name of COMMAND_NAMES) {
     const command = new RegExp(`^  ${name}:\\s*$`, 'm');
     if (command.test(section)) {
@@ -109,12 +137,11 @@ function updateQuickCommand(content) {
 }
 
 function removeQuickCommand(content) {
-  let result = content;
-  for (const name of COMMAND_NAMES) {
-    const pattern = new RegExp(`\\n?  ${name}:\\n    type: alias\\n    target: ${COMMAND_TARGET}\\n?`, 'm');
-    result = result.replace(pattern, '\n');
-  }
-  return result;
+  return removeQuickCommandBlocks(
+    content,
+    [...COMMAND_NAMES, ...LEGACY_COMMAND_NAMES],
+    [COMMAND_TARGET, '/precision-planning'],
+  );
 }
 
 function setWindowsUserEnv(value) {
@@ -145,8 +172,8 @@ function install(home) {
   setWindowsUserEnv(currentValues.join(','));
 
   console.log('Precision Planning v6 установлен.');
-  console.log(`Скилл: ${target}`);
-  console.log(`Команды: ${COMMAND_NAMES.map((name) => `/${name}`).join(', ')} → ${COMMAND_TARGET}`);
+  console.log(`Канонический skill-command: /${SKILL_NAME} → ${target}`);
+  console.log(`Совместимые aliases: ${COMMAND_NAMES.map((name) => `/${name}`).join(', ')} → ${COMMAND_TARGET}`);
   console.log('Создайте новую сессию Hermes: /new или перезапустите приложение.');
 }
 
@@ -155,10 +182,10 @@ function status(home) {
   const config = readText(path.join(home, 'config.yaml'));
   const env = readText(path.join(home, '.env'));
   const aliasesConfigured = COMMAND_NAMES.every(
-    (name) => config.includes(`  ${name}:`) && config.includes(`target: ${COMMAND_TARGET}`),
+    (name) => new RegExp(`^  ${name}:\\s*$\\n    type: alias\\s*$\\n    target: ${COMMAND_TARGET.replace('/', '\\/')}\\s*$`, 'm').test(config),
   );
   console.log(`Hermes home: ${home}`);
-  console.log(`Skill: ${fs.existsSync(target) ? 'installed' : 'missing'} (${target})`);
+  console.log(`Skill command: ${fs.existsSync(target) ? 'installed' : 'missing'} (/${SKILL_NAME}: ${target})`);
   console.log(`Slash aliases: ${aliasesConfigured ? 'configured' : 'missing'} (${COMMAND_NAMES.map((name) => `/${name}`).join(', ')})`);
   console.log(`Preload: ${env.includes(`HERMES_TUI_SKILLS=`) && env.includes(SKILL_NAME) ? 'configured' : 'missing'}`);
 }
@@ -190,7 +217,7 @@ function main() {
     if (args.command === 'install') install(home);
     else if (args.command === 'status') status(home);
     else if (args.command === 'uninstall') uninstall(home);
-    else if (args.command === 'version') console.log('1.0.2');
+    else if (args.command === 'version') console.log('1.0.3');
     else help();
   } catch (error) {
     console.error(`Ошибка: ${error.message}`);

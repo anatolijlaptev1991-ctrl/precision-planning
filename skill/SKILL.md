@@ -1,5 +1,5 @@
 ---
-name: precision-planning
+name: laptev-plan
 version: 6.0.0
 license: MIT
 description: >-
