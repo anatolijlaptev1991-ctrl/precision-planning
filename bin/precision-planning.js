@@ -123,13 +123,16 @@ function install(home) {
   fs.copyFileSync(BUNDLED_SKILL, target);
 
   const envFile = path.join(home, '.env');
-  writeText(envFile, addSkillToEnv(readText(envFile)));
+  const updatedEnv = addSkillToEnv(readText(envFile));
+  writeText(envFile, updatedEnv);
 
   const configFile = path.join(home, 'config.yaml');
   writeText(configFile, updateQuickCommand(readText(configFile)));
 
-  const currentValues = (process.env.HERMES_TUI_SKILLS || '').split(',').map((item) => item.trim()).filter(Boolean);
-  if (!currentValues.includes(SKILL_NAME)) currentValues.unshift(SKILL_NAME);
+  const preloadMatch = updatedEnv.match(/^export HERMES_TUI_SKILLS=(.*)$/m);
+  const currentValues = preloadMatch
+    ? preloadMatch[1].split(',').map((item) => item.trim()).filter(Boolean)
+    : [SKILL_NAME];
   setWindowsUserEnv(currentValues.join(','));
 
   console.log('Precision Planning v6 установлен.');
