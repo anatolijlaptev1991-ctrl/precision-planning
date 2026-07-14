@@ -1,5 +1,10 @@
 # История изменений
 
+## 1.0.7 — 2026-07-14
+
+- Удалены все упоминания «Precision Planning» и «v6» из CLI, CHANGELOG.
+- CLI-сообщения и help теперь используют «laptev-plan».
+
 ## 1.0.6 — 2026-07-14
 
 - README полностью переписан под Версия 4.0 (ЛШ, фазы, чекпоинты, risk matrix, evidence, аудит).
@@ -38,7 +43,7 @@
 
 ## 1.0.0 — 2026-07-14
 
-- Добавлен Precision Planning Skill v6.0.0.
+- Добавлен скилл laptev-plan v4.0.0.
 - Добавлен npm-установщик `precision-planning`.
 - Добавлена установка скилла в Hermes Agent.
 - Добавлена автозагрузка через `HERMES_TUI_SKILLS`.

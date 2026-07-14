@@ -60,7 +60,7 @@ function addSkillToEnv(content) {
     return content.replace(line, `export HERMES_TUI_SKILLS=${values.join(',')}`);
   }
   const suffix = content.endsWith('\n') || content.length === 0 ? '' : '\n';
-  return `${content}${suffix}\n# Precision Planning preload\nexport HERMES_TUI_SKILLS=${wanted}\n`;
+  return `${content}${suffix}\n# laptev-plan preload\nexport HERMES_TUI_SKILLS=${wanted}\n`;
 }
 
 function removeSkillFromEnv(content) {
@@ -71,7 +71,7 @@ function removeSkillFromEnv(content) {
     (item) => item && item !== SKILL_NAME && item !== LEGACY_SKILL_NAME,
   );
   if (values.length) return content.replace(line, `export HERMES_TUI_SKILLS=${values.join(',')}`);
-  return content.replace(/\n?# Precision Planning preload\n/, '\n').replace(`${match[0]}\n`, '');
+  return content.replace(/\n?# laptev-plan preload\n/, '\n').replace(`${match[0]}\n`, '');
 }
 
 function quickCommandBlock() {
@@ -107,7 +107,7 @@ function updateQuickCommand(content) {
   const header = /^quick_commands:\s*$/m;
   if (!header.test(content)) {
     const prefix = content.length && !content.endsWith('\n') ? '\n' : '';
-    return `${content}${prefix}\n# Precision Planning slash command\n${quickCommandBlock()}\n`;
+    return `${content}${prefix}\n# laptev-plan slash command\n${quickCommandBlock()}\n`;
   }
 
   const headerMatch = header.exec(content);
@@ -171,7 +171,7 @@ function install(home) {
     : [SKILL_NAME];
   setWindowsUserEnv(currentValues.join(','));
 
-  console.log('Precision Planning v6 установлен.');
+  console.log('laptev-plan v4.0 установлен.');
   console.log(`Канонический skill-command: /${SKILL_NAME} → ${target}`);
   console.log(`Совместимые aliases: ${COMMAND_NAMES.map((name) => `/${name}`).join(', ')} → ${COMMAND_TARGET}`);
   console.log('Создайте новую сессию Hermes: /new или перезапустите приложение.');
@@ -197,12 +197,12 @@ function uninstall(home) {
   if (fs.existsSync(envFile)) writeText(envFile, removeSkillFromEnv(readText(envFile)));
   const configFile = path.join(home, 'config.yaml');
   if (fs.existsSync(configFile)) writeText(configFile, removeQuickCommand(readText(configFile)));
-  console.log('Precision Planning удалён из Hermes.');
+  console.log('laptev-plan удалён из Hermes.');
   console.log('Перезапустите Hermes для обновления списка скиллов.');
 }
 
 function help() {
-  console.log(`Precision Planning Skill v6 — установщик для Hermes Agent\n\n` +
+  console.log(`laptev-plan — установщик скилла для Hermes Agent\n\n` +
     `Использование:\n` +
     `  precision-planning install [--home PATH]   установить скилл и /laptev-plan\n` +
     `  precision-planning status [--home PATH]    проверить установку\n` +
@@ -217,7 +217,7 @@ function main() {
     if (args.command === 'install') install(home);
     else if (args.command === 'status') status(home);
     else if (args.command === 'uninstall') uninstall(home);
-    else if (args.command === '--version' || args.command === 'version') console.log('1.0.6');
+    else if (args.command === '--version' || args.command === 'version') console.log('1.0.7');
     else help();
   } catch (error) {
     console.error(`Ошибка: ${error.message}`);
