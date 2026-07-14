@@ -6,7 +6,7 @@
   "author": "Анатолий Лаптев",
   "repository": {
     "type": "git",
-    "url": "https://github.com/anatolijlaptev1991-ctrl/precision-planning.git"
+    "url": "git+https://github.com/anatolijlaptev1991-ctrl/precision-planning.git"
   },
   "homepage": "https://github.com/anatolijlaptev1991-ctrl/precision-planning",
   "bugs": {
