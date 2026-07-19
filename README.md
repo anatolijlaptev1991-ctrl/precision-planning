@@ -1,65 +1,194 @@
 <div align="center">
 
-# 🧭 Скилл генерации плана выполнения задачи
+# 🧭 laptev-plan
 
-**Версия 4.0 — универсальная спецификация с формальными контрактами, моделью рисков, бюджетом проверок, машинно-читаемыми логами и управляемой деградацией.**
+**Модель-независимый skill формализации исполнимых планов для Hermes Agent.**
 
 [![License](https://img.shields.io/github/license/anatolijlaptev1991-ctrl/precision-planning?style=flat-square)](LICENSE)
-|[![Stars](https://img.shields.io/github/stars/anatolijlaptev1991-ctrl/precision-planning?style=flat-square)](https://github.com/anatolijlaptev1991-ctrl/precision-planning/stargazers)
-|[![Version](https://img.shields.io/badge/skill-v4.0.0-6366f1?style=flat-square)](skill/SKILL.md)
-|[![Hermes](https://img.shields.io/badge/Hermes%20Agent-compatible-6366f1?style=flat-square)](https://github.com/NousResearch/hermes-agent)
-|[![npm](https://img.shields.io/npm/v/@anatolijlaptev1991/precision-planning?style=flat-square&label=npm)](https://www.npmjs.com/package/@anatolijlaptev1991/precision-planning)
-|[![Node](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
+[![Skill](https://img.shields.io/badge/skill-v5.1.0-6366f1?style=flat-square)](skill/SKILL.md)
+[![npm](https://img.shields.io/npm/v/@anatolijlaptev1991/precision-planning?style=flat-square&label=npm)](https://www.npmjs.com/package/@anatolijlaptev1991/precision-planning)
+[![Hermes](https://img.shields.io/badge/Hermes%20Agent-compatible-6366f1?style=flat-square)](https://github.com/NousResearch/hermes-agent)
+[![Node](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
 
 </div>
 
 ---
 
-## Описание
+## Что это
 
-Скилл преобразует один или несколько `.md` файлов с описанием задачи, процедуры,
-требований или архитектурной логики в **формализованный, исполнимый, проверяемый
-и аудируемый план выполнения**.
+`laptev-plan` преобразует один или несколько `.md`-файлов с описанием задачи,
+процедуры, требований или архитектурной логики в формализованный, исполнимый,
+проверяемый и аудируемый план.
 
-Результат — самодостаточная файловая структура `Plan_<plan_name>/`, содержащая:
+Скилл **не выполняет задачу сам**. Он создаёт контракты для оркестратора и
+агентов-исполнителей. Исполнитель получает один замкнутый атомарный шаг, а не
+неполное указание «сделай как-нибудь».
 
-- иерархию **фаз, задач и чекпоинтов**;
-- машинно-читаемые **YAML/NDJSON-артефакты**;
-- зависимости и **частичный порядок** выполнения;
-- проверки эффектов и инвариантов;
-- **многомерную модель рисков** с risk tags и матрицей действий;
-- **профиль среды исполнения** (command policy, path policy, network policy);
-- правила отката и стратегии повторов;
-- журналы выполнения и **evidence-модель**;
-- аудит и финальный отчёт.
+Основной результат — самодостаточная файловая структура:
 
-> Скилл создаёт план, но не выполняет запланированные действия и не подменяет
-> исполнителя. Это намеренная граница безопасности.
+```text
+Plan_<plan_name>/
+  plan_hierarchy.yaml
+  source_manifest.yaml
+  skill_config.resolved.yaml
+  environment_profile.resolved.yaml
+  executor_profile.resolved.yaml
+  artifacts_registry.yaml
+  executor_readiness.yaml
+  templates/atomic_step_prompt.md
+  normalization/
+  audit/
+  Phase_01/
+    phase_context.yaml
+    phase_execution_log.ndjson
+    tasks/task_01.yaml
+    steps/step_0001.yaml
+  final_report.yaml
+```
 
-## Главные возможности
+Все машинно-значимые данные хранятся в YAML/NDJSON. Markdown остаётся только
+человеко-читаемым пояснением, а не единственным источником истины.
 
-- ✅ извлечение **логических шагов (ЛШ)** с `source_anchor` и `origin`;
-- ✅ **классификация входа**: executable procedure, requirements spec, architecture, weakly structured text;
-- ✅ **нормализатор** со self-diff against source и режимом недоверия;
-- ✅ построение графа зависимостей и **частичного порядка**;
-- ✅ **многомерная модель рисков**: `risk_level` + `risk_tags` (SAFE, REVERSIBLE, DESTRUCTIVE_IRREVERSIBLE, SECRET_TOUCHING, …);
-- ✅ **матрица действий** для каждого risk tag × execution mode (interactive/autonomous/sandbox/production);
-- ✅ **профиль среды**: command policy (argv, deny/allow), path policy, network whitelist/denylist, secret masking;
-- ✅ **чекпоинты**: `AIO` (атомарная операция), `VERIFY` (проверка), `MANUAL`;
-- ✅ **evidence-модель** с хешами, redaction и assertions;
-- ✅ **бюджет проверок** с формулой сложности и дедупликацией;
-- ✅ **rollback** с подтверждением и стратегиями (snapshot, backup, revert);
-- ✅ **retry strategies**: none, fixed, linear, exponential backoff;
-- ✅ **регенерация плана** при пропуске задач с лимитом и блокировкой;
-- ✅ **аудит** с адаптивным количеством раундов и классификацией изъянов;
-- ✅ **управляемая деградация**: FULL_PLAN → PARTIAL_PLAN → PLAN_WITH_BLOCKERS → REJECT_*;
-- ✅ машинно-читаемые **YAML/NDJSON** логи и финальный отчёт;
-- ✅ глобальная skill-команда `/laptev-plan` во всех сессиях Hermes;
-- ✅ совместимые aliases `/laptev_plan` и `/precision-planning`.
+## Версия 5.1.0: что изменилось принципиально
+
+- **Атомарность обязательна для каждого плана.** Иерархия теперь:
+  `Фаза → Задача → Атомарный шаг`.
+- **Единая сущность шага.** Старые `AIO` и `VERIFY` больше не являются
+  исполняемыми единицами. Шаг содержит `action` и `done_criteria` — единственный
+  источник истины для проверки самого шага.
+- **Интеграционные проверки сохранены отдельно:**
+  `task_verifications`, `phase_verifications` и read-only `verification_batch`.
+- **Модель-независимый исполнитель.** Нет классов `small_model`/`large_model`,
+  имён моделей и порогов «по размеру модели». Используются измеримые
+  `executor_constraints`: контекст, вывод, размер шага, структурированный ответ,
+  число действий.
+- **Автодетекция ограничений.** До генерации плана проверяются Ollama и
+  совместимые локальные API; при отсутствии данных применяется консервативный
+  профиль 4096/1024 с предупреждением `EXECUTOR_CONSTRAINTS_ASSUMED`.
+- **Безопасный формат вывода.** `EDIT_FILE` требует unified diff и hash
+  неизменённых областей; `APPEND_FILE` требует `APPEND_PAYLOAD`, который
+  физически дописывает оркестратор; запрещены каналы скрытой мутации.
+- **Единая иерархия retry.** Глобальный лимит → задача → шаг, с классификацией
+  `error_class` и запретом автоматического retry для опасных/логических ошибок.
+- **Четыре уровня rollback.** Шаг → задача → фаза → среда; используется самый
+  локальный применимый откат.
+- **Readiness gate.** Перед выдачей `FULL_PLAN` или `PARTIAL_PLAN` обязателен
+  `executor_readiness.yaml` со статусом `READY` и восемью проверками R1–R8.
+- **Upstream/hermetic gates.** Встроены правила Windows home-isolation,
+  before/after hash-манифеста, artifact-path lint, drift до commit, exact
+  staging allowlist, Git identity gate, fork/PR read-back и CI fork-approval.
+
+## Основные гарантии
+
+### 1. Трассируемость
+
+Каждый логический шаг (`LSH`), задача, атомарный шаг и инфраструктурный элемент
+имеет `origin` и `source_anchor`. Скилл не добавляет функциональные требования
+от себя.
+
+Допустимые источники:
+
+```yaml
+origin:
+  - EXPLICIT
+  - INFERRED
+  - SYSTEM
+  - USER_CONFIRMED
+  - ASSUMPTION
+  - LOW_CONFIDENCE_INFERENCE
+```
+
+Предположения не могут породить необратимые, привилегированные или внешние
+побочные действия без явного подтверждения пользователя.
+
+### 2. Атомарный контракт
+
+Каждый шаг выполняется ровно одним вызовом исполнителя и содержит:
+
+- `step_id`, `task_id`, `phase_id`, `origin`;
+- один `action` из закрытого списка;
+- `knowledge_boundary` с facts, inputs и `must_not_assume`;
+- `context_pack` с хешами файлов и артефактов;
+- `output_contract`;
+- минимум один машинный `done_criteria`;
+- `negative_constraints` для мутирующих действий;
+- `risk_level`, `risk_tags`, `retry_policy`, `rollback`.
+
+Закрытый список действий:
+
+```text
+CREATE_FILE       EDIT_FILE          APPEND_FILE
+DELETE_FILE       WRITE_CONFIG_KEY   RUN_COMMAND
+READ_FILE         ASSERT_STATE
+```
+
+Критерии атомарности C1–C8 запрещают несколько действий, несколько целей,
+скрытый внешний контекст, неустранимую неоднозначность и превышение бюджета
+исполнителя. Тривиальная задача, уже удовлетворяющая критериям, не дробится
+искусственно.
+
+### 3. Риск и политика безопасности
+
+Риск описывается одновременно уровнем и тегами:
+
+```yaml
+risk_level: HIGH
+risk_tags:
+  - PRIVILEGED
+  - NETWORKED
+  - REVERSIBLE
+```
+
+Поддерживаются `SAFE`, `REVERSIBLE`, `DESTRUCTIVE_REVERSIBLE_WITH_SNAPSHOT`,
+`DESTRUCTIVE_IRREVERSIBLE`, `DATA_LOSS_RISK`, `PRIVILEGED`, `SECRET_TOUCHING`,
+`NETWORKED`, `EXTERNAL_SIDE_EFFECT`, `COMPLIANCE_SENSITIVE` и
+`PRODUCTION_IMPACTING`.
+
+Для каждой комбинации риска и режима (`interactive`, `autonomous`, `sandbox`,
+`production`) действует матрица `allow` / `require_confirmation` / `deny`.
+Секреты не попадают в журналы: stdout/stderr фильтруются, вместо значения
+фиксируются тип, hash и видимый префикс.
+
+### 4. Артефакты как единственный канал передачи
+
+Исполнитель не имеет памяти между вызовами. Результат, необходимый следующему
+шагу, публикуется в неизменяемом `artifacts_registry.yaml`:
+
+```yaml
+artifact_id: ART-0017
+producer_step: AS-0038
+path: artifacts/ART-0017_config_schema.yaml
+sha256: sha256:...
+consumers: [AS-0042]
+```
+
+Зависимость требует одновременно ребро в графе и ссылку на артефакт в inputs.
+Хеши проверяются перед выдачей шага; рассинхронизация означает drift и требует
+пересборки контракта.
+
+### 5. Управляемая деградация
+
+| Уровень | Смысл |
+|---|---|
+| `FULL_PLAN` | Полный исполнимый план, readiness gate пройден |
+| `PARTIAL_PLAN` | Безопасно усечённый план до неразрешимой зоны |
+| `PLAN_WITH_BLOCKERS` | Исполнение остановлено до ручного разрешения |
+| `DRY_RUN_PLAN` | Только структура и анализ, без автозапуска команд |
+| `REJECT_UNSAFE` | Вход или действие небезопасны |
+| `REJECT_UNPARSABLE` | Вход нельзя безопасно разобрать |
+| `REJECT_NO_EXECUTABLE_LOGIC` | В источнике нет исполняемой логики |
+| `REJECT_CONTRADICTORY` | Противоречия не разрешены |
+| `FATAL` | Безопасное продолжение фактически невозможно |
+
+Если нормализатор слабоструктурированного текста недоступен, скилл не угадывает:
+он либо использует безопасный детерминированный fallback, либо создаёт блокер/
+отказ.
 
 ## Установка
 
-### Рекомендуемый способ через npm
+Текущий npm-пакет содержит не только ядро, но и все reference-файлы v5.1.0:
+схемы артефактов, контракт атомарного шага, runtime-протокол, executor
+detection, нормативный Rust-пример и upstream-hermetic checklist.
 
 ```bash
 npm install -g @anatolijlaptev1991/precision-planning
@@ -68,39 +197,48 @@ precision-planning install
 
 Установщик:
 
-1. копирует `SKILL.md` в `~/.hermes/skills/software-development/laptev-plan/`;
-2. добавляет `laptev-plan` в `HERMES_TUI_SKILLS` в `~/.hermes/.env`;
-3. обновляет Windows User Environment Variable для Desktop/Tauri-пути;
-4. регистрирует совместимые aliases `/laptev_plan` и `/precision-planning` → `/laptev-plan` в `config.yaml`;
-5. не регистрирует `/laptev-plan` как quick command: эта команда создаётся Hermes skill scanner напрямую.
+1. копирует всё дерево `skill/` в
+   `~/.hermes/skills/software-development/laptev-plan/`;
+2. добавляет `laptev-plan` в `HERMES_TUI_SKILLS`;
+3. обновляет Windows User Environment Variable для стандартного Hermes home;
+4. поддерживает aliases `/laptev_plan` и `/precision-planning`, направляя их
+   на канонический `/laptev-plan`;
+5. не регистрирует `/laptev-plan` как отдельный quick command — его обнаруживает
+   Hermes skill scanner;
+6. просит новую сессию после установки.
 
-После установки создайте новую сессию Hermes командой `/new` или перезапустите
-приложение.
+Для отдельного Hermes-профиля или тестового каталога:
 
-### Проверка и удаление
+```bash
+precision-planning install --home "C:\Users\<user>\.hermes\profiles\<profile>"
+```
+
+При явном `--home` установщик **не меняет глобальную Windows-переменную** —
+это безопасно для изолированных профилей и тестов.
+
+Проверка и удаление:
 
 ```bash
 precision-planning status
 precision-planning uninstall
+precision-planning --version
 ```
 
-Для отдельного профиля Hermes можно указать домашний каталог явно:
+`status` показывает версию skill, наличие reference tree, aliases и preload.
 
-```bash
-precision-planning install --home "C:\\Users\\<user>\\.hermes\\profiles\\<profile>"
-```
+## Использование в Hermes
 
-## Использование
-
-В Hermes Agent:
+Каноническая команда и имя скилла:
 
 ```text
 /laptev-plan
 ```
 
-Это канонический skill-command, который обнаруживается из frontmatter
-`name: laptev-plan` в общем каталоге `~/.hermes/skills/` и доступен после
-перезапуска в любой новой сессии.
+С задачей:
+
+```text
+/laptev-plan Подготовь план миграции сервиса на новую схему токенов.
+```
 
 Совместимые aliases:
 
@@ -109,153 +247,132 @@ precision-planning install --home "C:\\Users\\<user>\\.hermes\\profiles\\<profil
 /precision-planning
 ```
 
-или сразу с задачей:
+После установки или обновления создайте новую сессию `/new` либо перезапустите
+Hermes Desktop: текущий загрузчик skills кэшируется на время сессии.
 
-```text
-/laptev-plan Подготовь план миграции этого сервиса на новую схему токенов.
-```
+## Конфигурация
 
-## Что именно выдаёт скилл
-
-### Логические шаги (ЛШ)
-
-Каждая инструкция извлекается с привязкой к источнику, типом и risk tags:
+Рекомендуемый `skill_config.yaml`:
 
 ```yaml
-id: "LSH-001"
-source_anchor:
-  file: "input.md"
-  line_start: 12
-  line_end: 16
-  quote_hash: "sha256:..."
-type: "EXEC"
-body: "Установить nginx"
-origin: "EXPLICIT"
-risk_tags: [PRIVILEGED, NETWORKED, REVERSIBLE]
+skill_config:
+  schema_version: "1.1"
+  execution_mode: interactive
+  output_format: yaml
+  log_format: ndjson
+  max_phase_attempts: 10
+  max_task_attempts: 10
+  max_regenerations_per_plan: 3
+  executor:
+    detection: auto
+    constraints:
+      max_context_tokens: null
+      max_output_tokens: null
+      max_new_lines_per_step: null
+      structured_output_required: true
+      maximum_actions_per_step: 1
+      external_context_allowed: false
+    granularity: atomic
+    step_retry_max: 3
+    drift_check_interval: 10
+    escalation: user
 ```
 
-### Частичный порядок
+Приоритет `executor_constraints`:
 
-Эталон выполнения — не одна жёсткая последовательность, а набор допустимых
-последовательностей, удовлетворяющих графу зависимостей.
+1. Явные ограничения в конфигурации.
+2. Подтверждённые пользователем ограничения.
+3. Автодетекция Ollama или совместимого API.
+4. Консервативный default: context 4096, output 1024, до 60 новых строк.
 
-### Модель рисков
+Имя модели фиксируется только информативно в evidence и не определяет пороги.
 
-Операция может иметь несколько risk tags одновременно. Для каждой комбинации
-risk tag × execution mode матрица действий определяет: allow, require_confirmation
-или deny.
+## Аудит и исполнение
 
-```yaml
-DESTRUCTIVE_IRREVERSIBLE:
-  interactive: require_explicit_confirmation
-  autonomous: deny
-  sandbox: require_confirmation
-  production: deny_by_default
-```
+Аудиторы работают в режиме `REPORT_ONLY` и не изменяют план или систему.
+Базовые направления: `logic_compliance`, `antifragility`, `architecture`.
+Дополнительные направления активируются security/performance/data-integrity/
+network/compliance тегами.
 
-### Evidence
+Аудит выполняется только для `FULL_PLAN` и `PARTIAL_PLAN`; для blockers, dry-run,
+reject и fatal причина пропуска фиксируется в `audit_summary.yaml`.
 
-Машинно-читаемая запись фактического результата: exit code, длительность, хеши
-stdout/stderr, changed_resources, assertions, redactions.
+Runtime-протокол разделяет роли:
 
-### Файловая структура плана
+- оркестратор управляет фазами, блокерами, регенерацией и итогом;
+- агент фазы проверяет rollback, locks и интеграционные проверки;
+- агент задачи исполняет шаги и retry/rollback;
+- исполнитель получает ровно один контракт и отвечает `STEP_OK` или `STEP_BLOCKED`.
 
-```text
-Plan_<plan_name>/
-  plan_hierarchy.yaml
-  source_manifest.yaml
-  environment_profile.resolved.yaml
-  Phase_01/
-    phase_context.yaml
-    phase_execution_log.ndjson
-    tasks/
-      task_01.yaml
-  final_report.yaml
-```
+## Upstream-планы и Windows hermetic-проверки
 
-Все структурированные файлы — YAML или NDJSON. Markdown допускается только для
-человекочитаемых пояснений, но не как единственный источник машинно-значимых
-данных.
+В поставку включён `references/upstream-hermetic-tests.md`. Он обязателен для
+планов, где direct pytest и canonical/CI-parity runner ведут себя по-разному.
 
-### Управляемая деградация
+Правила включают:
 
-| Уровень | Значение |
-|---|---|
-| `FULL_PLAN` | Полный исполнимый план |
-| `PARTIAL_PLAN` | План до первой неразрешимой зоны |
-| `PLAN_WITH_BLOCKERS` | План содержит блокеры, требующие ручного решения |
-| `DRY_RUN_PLAN` | Только структура и анализ, без исполнения |
-| `REJECT_UNSAFE` | Отказ из-за риска вреда |
-| `REJECT_UNPARSABLE` | Невозможно разобрать вход |
-| `FATAL` | Аварийное завершение |
+- актуализацию `origin/main` до диагностики;
+- отдельный worktree и отдельный Hermes Desktop Project;
+- разделение direct/canonical/clean-run контуров;
+- sandbox для `HOME`, `USERPROFILE`, `HOMEDRIVE`, `HOMEPATH`;
+- before/after hash-манифест реальных `~/.hermes` и legacy-каталогов;
+- проверку `artifact_id → registry.path → input.ref`;
+- запрет незаполненных `<placeholder>` в исполняемых командах;
+- drift-check до staging и commit;
+- exact allowlist для staged-файлов;
+- Git identity gate без подстановки чужого автора;
+- классификацию process-noise отдельно от test-pass;
+- различение upstream remote и пользовательского fork;
+- read-back branch/commit/PR и честную классификацию `action_required` fork-gate.
 
-## Сравнение с планированием в популярных coding agents
+External CI blocker не превращается в ложный успех: допустим итог
+`COMPLETED_WITH_EXTERNAL_CI_BLOCKED`, если локальные gates и handles проверены,
+а upstream approval недоступен.
 
-Сравнение относится к базовым официально описанным режимам планирования продуктов,
-а не к качеству конкретной модели. У каждого инструмента есть сильные стороны;
-этот скилл не заявляет, что заменяет исполнение, sandbox или IDE.
-
-| Инструмент | Официальный механизм | Что даёт этот скилл сверх базового режима |
-|---|---|---|
-| **Claude Code** | Plan mode читает файлы и предлагает план до изменений; пользователь затем разрешает выполнение. | Формальная трассировка ЛШ, многомерная модель рисков с матрицей действий, машинно-читаемые YAML/NDJSON артефакты, evidence с хешами и redaction, аудит с классификацией изъянов. |
-| **Google Antigravity** | Implementation Plan оформляется как Artifact; его можно просматривать, комментировать и подтверждать кнопкой Proceed. | Независимость от desktop/UI-артефактов: переносимая файловая структура, command policy, path policy, профили среды, деградация и rollback с подтверждением. |
-| **OpenAI Codex** | Plan mode собирает контекст, задаёт вопросы и строит план; для длинных задач можно применять `PLANS.md`, `AGENTS.md` и проверки. | Более строгий контракт: budget проверок с формулой сложности, регенерация с лимитом, retry strategies,NDJSON execution logs и честные статусы деградации. |
-| **OpenCode** | Встроенный Plan agent ограничивает edits/bash, предлагает план, затем пользователь переключается в Build; поддерживаются итерация и subagents. | Планирование не привязано к режиму агента: один формат переносится между исполнителями, с command validation, secret masking и audit independence. |
-| **ZCode** | Goal ориентирован на долгие задачи: агент разбивает цель, выполняет шаги, показывает прогресс и поддерживает удалённое управление. | Вместо долгоживущей цели — формализованная спецификация с ЛШ, частичным порядком, risk matrix, evidence и блокерами; меньше зависимости от конкретного workflow. |
-
-### Честный вывод
-
-- **Claude Code, Codex и OpenCode** сильнее как непосредственные coding agents:
-  они читают репозиторий, меняют файлы и запускают тесты.
-- **Antigravity** сильнее как визуальный workflow с Artifact Review и комментариями.
-- **ZCode** сильнее как долгоживущая Goal-ориентированная среда с удалённым
-  управлением.
-- **Этот скилл** выигрывает как независимый слой формализации перед исполнением:
-  он уменьшает пространство скрытых решений и делает план проверяемым,
-  трассируемым и пригодным для передачи разным исполнителям.
-
-## Источники сравнения
-
-- [Claude Code — Common workflows](https://docs.anthropic.com/en/docs/claude-code/common-workflows)
-- [Google Antigravity — Implementation Plan](https://antigravity.google/docs/implementation-plan)
-- [Google Antigravity — Artifact Review](https://antigravity.google/docs/artifact-review)
-- [OpenAI Codex — Best practices](https://developers.openai.com/codex/learn/best-practices)
-- [OpenCode — Agents](https://opencode.ai/docs/agents/)
-- [OpenCode — Intro and Plan mode](https://opencode.ai/docs/)
-- [Z.AI — Developer Pack overview](https://docs.z.ai/devpack/overview)
-- [Z.AI — GLM-5.2](https://docs.z.ai/guides/llm/glm-5.2)
-
-## Структура репозитория
+## Структура поставки
 
 ```text
 precision-planning/
-├── skill/SKILL.md              # laptev-plan v4.0.0 — полная спецификация скилла
-├── bin/precision-planning.js   # npm CLI: install/status/uninstall
-├── package.json                # npm-пакет
-├── README.md                   # описание, установка и сравнение
+├── skill/
+│   ├── SKILL.md
+│   ├── CHANGELOG.md
+│   ├── reference/
+│   │   ├── schemas/plan_artifacts.md
+│   │   ├── schemas/atomic_step.md
+│   │   ├── protocol/execution.md
+│   │   ├── protocol/executor_detection.md
+│   │   └── examples/rust_config.md
+│   └── references/upstream-hermetic-tests.md
+├── bin/precision-planning.js
+├── package.json
+├── package-lock.json
+├── README.md
 ├── CHANGELOG.md
 └── LICENSE
 ```
 
-## Совместимость
-
-- Hermes Agent с пользовательскими скиллами;
-- Windows 10/11, macOS и Linux;
-- Node.js 18+ для npm-установщика;
-- npm 9+.
-
-На Windows установщик обновляет User Environment Variable через `setx`. Уже
-запущенные процессы не получают новые переменные — требуется новый запуск Hermes.
-
-## Разработка
+## Разработка и локальная проверка
 
 ```bash
 git clone https://github.com/anatolijlaptev1991-ctrl/precision-planning.git
 cd precision-planning
-node bin/precision-planning.js status
+node --check bin/precision-planning.js
+node bin/precision-planning.js --version
+node bin/precision-planning.js help
 npm pack --dry-run --json
 ```
 
+Для безопасного smoke-теста установщика используйте временный home:
+
+```bash
+precision-planning install --home "$TEMP_HERMES_HOME"
+precision-planning status --home "$TEMP_HERMES_HOME"
+```
+
+Проверяйте, что `skill/SKILL.md` и установленный `SKILL.md` совпадают по
+SHA-256, а reference-файлы присутствуют в целевом каталоге.
+
 ## Лицензия
 
-MIT — свободное использование, изменение и распространение с сохранением лицензии.
+MIT — свободное использование, изменение и распространение с сохранением
+лицензии.

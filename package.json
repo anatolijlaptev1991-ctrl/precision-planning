@@ -1,7 +1,7 @@
 {
   "name": "@anatolijlaptev1991/precision-planning",
-  "version": "1.0.7",
-  "description": "Скилл генерации плана выполнения задачи v4.0 для Hermes Agent: формальные контракты, модель рисков, машинно-читаемые YAML/NDJSON артефакты, evidence-модель и аудит.",
+  "version": "1.1.0",
+  "description": "Модель-независимый skill laptev-plan v5.1.0 для Hermes Agent: атомарные шаги, executor_constraints, risk matrix, evidence, реестр артефактов, retry/rollback, readiness gate, аудит и hermetic upstream-gates.",
   "license": "MIT",
   "author": "Анатолий Лаптев",
   "repository": {

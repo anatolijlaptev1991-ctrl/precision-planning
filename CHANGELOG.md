@@ -1,5 +1,15 @@
 # История изменений
 
+## 1.1.0 — 2026-07-19
+
+- Скилл синхронизирован с локальным Hermes Agent: `laptev-plan` v5.1.0.
+- Добавлено полное дерево reference-файлов: схемы артефактов, контракт атомарного шага, runtime-протокол, executor detection, Rust-пример и upstream-hermetic checklist.
+- Обновлено описание npm-пакета и README под фактическую модель `executor_constraints`.
+- Убраны устаревшие описания v4.0 и чекпоинтов `AIO`/`VERIFY` как исполняемых единиц.
+- CLI теперь копирует всё дерево `skill/`, а не только `SKILL.md`.
+- `precision-planning install --home ...` больше не изменяет глобальную Windows-переменную окружения.
+- `status` проверяет версию skill и наличие reference tree.
+
 ## 1.0.7 — 2026-07-14
 
 - Удалены все упоминания «Precision Planning» и «v6» из CLI, CHANGELOG.

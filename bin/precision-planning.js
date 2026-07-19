@@ -12,7 +12,10 @@ const COMMAND_NAMES = ['laptev_plan', 'precision-planning'];
 const LEGACY_COMMAND_NAMES = ['laptev-plan'];
 const COMMAND_TARGET = '/laptev-plan';
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
-const BUNDLED_SKILL = path.join(PACKAGE_ROOT, 'skill', 'SKILL.md');
+const PACKAGE_VERSION = require(path.join(PACKAGE_ROOT, 'package.json')).version;
+const SKILL_VERSION = '5.1.0';
+const BUNDLED_SKILL_DIR = path.join(PACKAGE_ROOT, 'skill');
+const BUNDLED_SKILL = path.join(BUNDLED_SKILL_DIR, 'SKILL.md');
 
 function parseArgs(argv) {
   const result = { command: argv[0] || 'help', home: null };
@@ -44,6 +47,19 @@ function readText(file) {
 function writeText(file, content) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, content, 'utf8');
+}
+
+function copyTree(source, destination) {
+  for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
+    const sourcePath = path.join(source, entry.name);
+    const destinationPath = path.join(destination, entry.name);
+    if (entry.isDirectory()) {
+      copyTree(sourcePath, destinationPath);
+    } else {
+      fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
+      fs.copyFileSync(sourcePath, destinationPath);
+    }
+  }
 }
 
 function skillPath(home) {
@@ -152,11 +168,10 @@ function setWindowsUserEnv(value) {
   }
 }
 
-function install(home) {
+function install(home, { updateWindowsEnv = true } = {}) {
   if (!fs.existsSync(BUNDLED_SKILL)) throw new Error(`Не найден встроенный SKILL.md: ${BUNDLED_SKILL}`);
   const target = skillPath(home);
-  fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.copyFileSync(BUNDLED_SKILL, target);
+  copyTree(BUNDLED_SKILL_DIR, path.dirname(target));
 
   const envFile = path.join(home, '.env');
   const updatedEnv = addSkillToEnv(readText(envFile));
@@ -169,23 +184,31 @@ function install(home) {
   const currentValues = preloadMatch
     ? preloadMatch[1].split(',').map((item) => item.trim()).filter(Boolean)
     : [SKILL_NAME];
-  setWindowsUserEnv(currentValues.join(','));
+  if (updateWindowsEnv) setWindowsUserEnv(currentValues.join(','));
 
-  console.log('laptev-plan v4.0 установлен.');
+  console.log(`laptev-plan skill v${SKILL_VERSION} установлен (npm-пакет v${PACKAGE_VERSION}).`);
   console.log(`Канонический skill-command: /${SKILL_NAME} → ${target}`);
   console.log(`Совместимые aliases: ${COMMAND_NAMES.map((name) => `/${name}`).join(', ')} → ${COMMAND_TARGET}`);
+  if (!updateWindowsEnv && process.platform === 'win32') {
+    console.log('Глобальная Windows-переменная не изменена: указан явный --home.');
+  }
   console.log('Создайте новую сессию Hermes: /new или перезапустите приложение.');
 }
 
 function status(home) {
   const target = skillPath(home);
+  const skillRoot = path.dirname(target);
   const config = readText(path.join(home, 'config.yaml'));
   const env = readText(path.join(home, '.env'));
   const aliasesConfigured = COMMAND_NAMES.every(
     (name) => new RegExp(`^  ${name}:\\s*$\\n    type: alias\\s*$\\n    target: ${COMMAND_TARGET.replace('/', '\\/')}\\s*$`, 'm').test(config),
   );
+  const skillInstalled = fs.existsSync(target) && readText(target).includes(`version: ${SKILL_VERSION}`);
+  const referencesInstalled = fs.existsSync(path.join(skillRoot, 'reference'))
+    && fs.existsSync(path.join(skillRoot, 'references', 'upstream-hermetic-tests.md'));
   console.log(`Hermes home: ${home}`);
-  console.log(`Skill command: ${fs.existsSync(target) ? 'installed' : 'missing'} (/${SKILL_NAME}: ${target})`);
+  console.log(`Skill: ${skillInstalled ? `installed v${SKILL_VERSION}` : 'missing'} (/${SKILL_NAME}: ${target})`);
+  console.log(`Reference tree: ${referencesInstalled ? 'installed' : 'incomplete'}`);
   console.log(`Slash aliases: ${aliasesConfigured ? 'configured' : 'missing'} (${COMMAND_NAMES.map((name) => `/${name}`).join(', ')})`);
   console.log(`Preload: ${env.includes(`HERMES_TUI_SKILLS=`) && env.includes(SKILL_NAME) ? 'configured' : 'missing'}`);
 }
@@ -214,10 +237,10 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   const home = hermesHome(args.home);
   try {
-    if (args.command === 'install') install(home);
+    if (args.command === 'install') install(home, { updateWindowsEnv: !args.home });
     else if (args.command === 'status') status(home);
     else if (args.command === 'uninstall') uninstall(home);
-    else if (args.command === '--version' || args.command === 'version') console.log('1.0.7');
+    else if (args.command === '--version' || args.command === 'version') console.log(PACKAGE_VERSION);
     else help();
   } catch (error) {
     console.error(`Ошибка: ${error.message}`);
