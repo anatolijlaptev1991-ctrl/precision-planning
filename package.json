@@ -1,7 +1,7 @@
 {
   "name": "@anatolijlaptev1991/precision-planning",
-  "version": "1.1.0",
-  "description": "Модель-независимый skill laptev-plan v5.1.0 для Hermes Agent: атомарные шаги, executor_constraints, risk matrix, evidence, реестр артефактов, retry/rollback, readiness gate, аудит и hermetic upstream-gates.",
+  "version": "1.1.1",
+  "description": "Понятный человеку и исполнимый агентом laptev-plan v5.1.1 для Hermes Agent: превращает описание задачи в безопасный пошаговый план с проверками, рисками, доказательствами результата и откатом.",
   "license": "MIT",
   "author": "Анатолий Лаптев",
   "repository": {

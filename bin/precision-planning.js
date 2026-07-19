@@ -13,7 +13,7 @@ const LEGACY_COMMAND_NAMES = ['laptev-plan'];
 const COMMAND_TARGET = '/laptev-plan';
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const PACKAGE_VERSION = require(path.join(PACKAGE_ROOT, 'package.json')).version;
-const SKILL_VERSION = '5.1.0';
+const SKILL_VERSION = '5.1.1';
 const BUNDLED_SKILL_DIR = path.join(PACKAGE_ROOT, 'skill');
 const BUNDLED_SKILL = path.join(BUNDLED_SKILL_DIR, 'SKILL.md');
 
